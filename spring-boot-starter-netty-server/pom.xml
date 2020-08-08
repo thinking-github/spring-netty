@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>org.springframework.netty</groupId>
+    <artifactId>spring-boot-starter-netty-server</artifactId>
+    <version>1.0.0-SNAPSHOT</version>
+    <name>spring-boot-starter-netty-server</name>
+    <description>spring-netty project for Spring Boot</description>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter</artifactId>
+            <version>1.5.19.RELEASE</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.netty</groupId>
+            <artifactId>spring-netty-http</artifactId>
+            <version>1.0.0-SNAPSHOT</version>
+        </dependency>
+    </dependencies>
+
+
+
+    <distributionManagement>
+        <repository>
+            <id>apus</id>
+            <name>libs-releases</name>
+            <url>http://public-maven.apuscn.com/nexus/content/repositories/releases/</url>
+        </repository>
+        <snapshotRepository>
+            <id>apus</id>
+            <name>libs-snapshots</name>
+            <url>http://public-maven.apuscn.com/nexus/content/repositories/snapshots/</url>
+        </snapshotRepository>
+    </distributionManagement>
+
+
+
+</project>
