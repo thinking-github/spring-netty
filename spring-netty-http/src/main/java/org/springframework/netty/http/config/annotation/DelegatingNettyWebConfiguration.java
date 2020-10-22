@@ -2,6 +2,7 @@ package org.springframework.netty.http.config.annotation;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.netty.http.HandlerExceptionResolver;
 import org.springframework.netty.http.converter.HttpMessageConverter;
 import org.springframework.util.CollectionUtils;
 import org.springframework.validation.Validator;
@@ -40,6 +41,10 @@ public class DelegatingNettyWebConfiguration extends NettyWebConfigurationSuppor
         this.configurers.configureMessageConverters(converters);
     }
 
+    @Override
+    protected void configureHandlerExceptionResolvers(List<HandlerExceptionResolver> exceptionResolvers) {
+        this.configurers.configureHandlerExceptionResolvers(exceptionResolvers);
+    }
 
     @Override
     protected ExecutorService getThreadPoolExecutor() {
