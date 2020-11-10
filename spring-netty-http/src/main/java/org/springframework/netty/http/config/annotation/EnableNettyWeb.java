@@ -1,5 +1,6 @@
 package org.springframework.netty.http.config.annotation;
 
+import org.springframework.boot.actuate.netty.endpoint.LoggersMvcEndpoint;
 import org.springframework.context.annotation.Import;
 
 import java.lang.annotation.*;
@@ -12,7 +13,7 @@ import java.lang.annotation.*;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
 @Documented
-@Import(DelegatingNettyWebConfiguration.class)
+@Import({DelegatingNettyWebConfiguration.class, LoggersMvcEndpoint.class})
 public @interface EnableNettyWeb {
 
 }

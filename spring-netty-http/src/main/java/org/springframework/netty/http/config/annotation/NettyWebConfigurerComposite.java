@@ -7,11 +7,12 @@ import org.springframework.validation.Validator;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.Executor;
+import java.util.Map;
 import java.util.concurrent.ExecutorService;
 
 /**
  * WebMvcConfigurerComposite
+ *
  * @author thinking
  * @version 1.0
  * @since 2020-03-16
@@ -76,6 +77,22 @@ class NettyWebConfigurerComposite implements NettyWebConfigurer {
                             selected + ", " + validator + "}");
                 }
                 selected = validator;
+            }
+        }
+        return selected;
+    }
+
+    @Override
+    public Map<String, Object> getProperties() {
+        Map<String, Object> selected = null;
+        for (NettyWebConfigurer configurer : this.delegates) {
+            Map<String, Object> properties = configurer.getProperties();
+            if (properties != null) {
+                if (selected != null) {
+                    throw new IllegalStateException("No unique properties found: {" +
+                            selected + ", " + properties + "}");
+                }
+                selected = properties;
             }
         }
         return selected;

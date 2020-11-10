@@ -20,11 +20,13 @@ import org.springframework.netty.http.handler.SimpleUrlHandlerMapping;
 import org.springframework.netty.http.mvc.DelegatingHandlerExceptionResolver;
 import org.springframework.netty.http.mvc.HttpRequestHandlerAdapter;
 import org.springframework.netty.http.support.DefaultHandlerExceptionResolver;
+import org.springframework.netty.http.util.CountSampling;
 import org.springframework.scheduling.concurrent.ThreadPoolExecutorFactoryBean;
 import org.springframework.util.ClassUtils;
 import org.springframework.validation.Validator;
 import org.springframework.web.HttpRequestHandler;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 
 import java.util.*;
 import java.util.concurrent.Executor;
@@ -71,6 +73,10 @@ public class NettyWebConfigurationSupport implements ApplicationContextAware,Env
 
     private HttpServer httpServer;
 
+    private Map<String,Object> properties;
+
+    private CountSampling countSampling = new CountSampling();
+
     @Override
     public void setEnvironment(Environment environment) {
         this.environment = environment;
@@ -91,6 +97,8 @@ public class NettyWebConfigurationSupport implements ApplicationContextAware,Env
             Object handler = entry.getValue();
             RequestMapping requestMapping = AnnotationUtils.getAnnotation(handler.getClass(), RequestMapping.class);
             String[] path = requestMapping.value();
+            //RequestMethod[] requestMethods = requestMapping.method();
+
             handlerMapping.registerHandler(path, handler);
         }
     }
@@ -198,10 +206,19 @@ public class NettyWebConfigurationSupport implements ApplicationContextAware,Env
         return null;
     }
 
+
     /**
      * Override this method to provide a custom {@link Validator}.
      */
     protected Validator getValidator() {
+        return null;
+    }
+
+
+    /**
+     * Override this method to provide a custom  Configuration{@link Properties}.
+     */
+    protected Map<String, Object> getProperties() {
         return null;
     }
 
@@ -274,7 +291,21 @@ public class NettyWebConfigurationSupport implements ApplicationContextAware,Env
 
     @Bean
     public DispatcherHandler dispatcherHandler() {
-        return new DispatcherHandler(executorService());
+        this.properties = getProperties();
+        DispatcherHandler dispatcherHandler = new DispatcherHandler(executorService());
+
+        if (this.properties != null) {
+            Integer min = (Integer) this.getProperties().get("count.sampling.min");
+            Integer interval = (Integer) this.getProperties().get("count.sampling.interval");
+            if (min != null) {
+                countSampling.setMin(min);
+            }
+            if (interval != null) {
+                countSampling.setInterval(interval);
+            }
+        }
+        dispatcherHandler.setCountSampling(countSampling);
+        return dispatcherHandler;
     }
 
     @Bean

@@ -22,7 +22,7 @@ import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.support.PropertiesLoaderUtils;
 import org.springframework.netty.http.context.RequestContextHolder;
-import org.springframework.netty.http.codec.QueryDecoder;
+import org.springframework.netty.http.util.CountSampling;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.util.NestedServletException;
@@ -135,6 +135,10 @@ public class DispatcherHandler extends SimpleChannelInboundHandler<FullHttpReque
 
     private ExecutorService executorService;
 
+    private CountSampling countSampling;
+
+    private String[] directBackUrls = {"/favicon.ico"};
+
 
     public DispatcherHandler(ExecutorService executorService) {
         this.executorService = executorService;
@@ -206,6 +210,10 @@ public class DispatcherHandler extends SimpleChannelInboundHandler<FullHttpReque
     @Override
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
         initStrategies(applicationContext);
+    }
+
+    public void setCountSampling(CountSampling countSampling) {
+        this.countSampling = countSampling;
     }
 
     protected void initStrategies(ApplicationContext context) {
@@ -397,12 +405,14 @@ public class DispatcherHandler extends SimpleChannelInboundHandler<FullHttpReque
     }
 
     protected void doDispatch(ChannelHandlerContext ctx, FullHttpRequest request) throws Exception {
-
-        if(logger.isDebugEnabled()){
+        long count = countSampling.getCount();
+        boolean sampling = countSampling.next();
+        ctx.channel().attr(HandlerMapping.REQUEST_DISPATCH_COUNT_SAMPLING).set(sampling);
+        if (logger.isDebugEnabled() && sampling) {
             long startTime = System.currentTimeMillis();
             ctx.channel().attr(HandlerMapping.REQUEST_DISPATCH_START_TIME).set(startTime);
-            logger.debug("---> {} {}",request.method().name(),request.uri());
-            logger.debug("http headers : ",request.headers());
+            logger.debug("---> {} {}, count={}", request.method().name(), request.uri(), count);
+            logger.debug("---> http headers : {}", request.headers());
         }
         HandlerExecutionChain mappedHandler = null;
 
@@ -507,7 +517,8 @@ public class DispatcherHandler extends SimpleChannelInboundHandler<FullHttpReque
             httpHeaders.set(CONTENT_LENGTH, response.content().readableBytes());
         }
 
-        if (logger.isDebugEnabled()) {
+        Boolean sampling = ctx.channel().attr(HandlerMapping.REQUEST_DISPATCH_COUNT_SAMPLING).get();
+        if (logger.isDebugEnabled() && sampling) {
             long endTime = System.currentTimeMillis();
             Long startTime = ctx.channel().attr(HandlerMapping.REQUEST_DISPATCH_START_TIME).get();
             if (startTime == null) {

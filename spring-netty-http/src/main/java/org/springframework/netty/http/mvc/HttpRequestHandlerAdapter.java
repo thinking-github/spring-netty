@@ -7,12 +7,10 @@ import io.netty.handler.codec.http.HttpResponse;
 import io.netty.util.CharsetUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.netty.http.HandlerAdapter;
-import org.springframework.netty.http.HttpOutputMessage;
-import org.springframework.netty.http.HttpRequestHandler;
-import org.springframework.netty.http.HttpResponseImpl;
+import org.springframework.netty.http.*;
 import org.springframework.netty.http.converter.HttpMessageConverter;
 import org.springframework.netty.http.support.GenericsUtils;
+import org.springframework.netty.http.util.CountSampling;
 
 import java.util.HashMap;
 import java.util.List;
@@ -79,7 +77,8 @@ public class HttpRequestHandlerAdapter implements HandlerAdapter {
                 inputClass = GenericsUtils.getInterfaceGenericType(handler.getClass(), 0, 0);
                 findCache.put(handler.getClass(), inputClass);
             }
-            if (logger.isDebugEnabled()) {
+            Boolean sampling = ctx.channel().attr(HandlerMapping.REQUEST_DISPATCH_COUNT_SAMPLING).get();
+            if (logger.isDebugEnabled() && sampling) {
                 logger.debug("HttpRequest Body : {}", contentByte.toString(CharsetUtil.UTF_8));
             }
             inputBody = messageConverterMethodProcessor.readWithMessageConverters(request, inputClass);

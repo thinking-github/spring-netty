@@ -101,11 +101,18 @@ public class DelegatingHandlerExceptionResolver implements HandlerExceptionResol
             ResponseEntity responseEntity = (ResponseEntity) response;
             body = responseEntity.getBody();
             status = responseEntity.getStatus();
+        } else if (response instanceof org.springframework.http.ResponseEntity) {
+            org.springframework.http.ResponseEntity responseEntity = (org.springframework.http.ResponseEntity) response;
+            body = responseEntity.getBody();
+            status = HttpResponseStatus.valueOf(responseEntity.getStatusCode().value());
         } else {
             body = response;
         }
 
         HttpOutputMessage outputMessage = new HttpResponseImpl(status);
+        if (body == null) {
+            return outputMessage;
+        }
         try {
             messageConverterMethodProcessor.writeWithMessageConverters(body, request, outputMessage);
         } catch (Exception e) {

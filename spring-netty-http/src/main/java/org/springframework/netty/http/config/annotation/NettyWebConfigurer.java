@@ -5,6 +5,7 @@ import org.springframework.netty.http.converter.HttpMessageConverter;
 import org.springframework.validation.Validator;
 
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutorService;
 
 /**
@@ -43,6 +44,13 @@ public interface NettyWebConfigurer {
 
 
     Validator getValidator();
+
+    /**
+     * customize Configuration
+     *
+     * @return
+     */
+    Map<String, Object> getProperties();
 
 
 }

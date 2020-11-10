@@ -12,7 +12,7 @@ import java.io.IOException;
  * @version 1.0
  * @since 2020-03-24
  */
-public interface RestHandler {
+public interface RestHandler<T> extends HttpRequestHandler<T> {
 
     /**
      * handler http post request
@@ -23,7 +23,7 @@ public interface RestHandler {
      * @return
      * @throws IOException
      */
-    <R> R post(ChannelHandlerContext ctx, FullHttpRequest request)
+    <R> R post(ChannelHandlerContext ctx, FullHttpRequest request, T inputBody)
             throws IOException;
 
     /**
@@ -49,7 +49,7 @@ public interface RestHandler {
      * @return
      * @throws IOException
      */
-    <R> R put(ChannelHandlerContext ctx, FullHttpRequest request)
+    <R> R put(ChannelHandlerContext ctx, FullHttpRequest request, T inputBody)
             throws IOException;
 
 
@@ -62,7 +62,7 @@ public interface RestHandler {
      * @return
      * @throws IOException
      */
-    <R> R patch(ChannelHandlerContext ctx, FullHttpRequest request)
+    <R> R patch(ChannelHandlerContext ctx, FullHttpRequest request, T inputBody)
             throws IOException;
 
 

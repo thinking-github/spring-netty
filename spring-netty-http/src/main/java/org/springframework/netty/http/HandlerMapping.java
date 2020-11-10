@@ -22,6 +22,18 @@ public interface HandlerMapping {
     AttributeKey<String> REQUEST_HANDLER_METHOD_KEY = AttributeKey.valueOf("request_handler_method_key");
 
 
+    /**
+     * 请求事件类型key 可用于打点
+     */
+    AttributeKey<String> REQUEST_HANDLER_ACTION_KEY = AttributeKey.valueOf("request_handler_action_key");
+
+
+    /**
+     * 统计抽样
+     */
+    AttributeKey<Boolean> REQUEST_DISPATCH_COUNT_SAMPLING = AttributeKey.valueOf("request_dispatch_count_sampling");
+
+
     /*
      * 请求调度开始时间戳
      */

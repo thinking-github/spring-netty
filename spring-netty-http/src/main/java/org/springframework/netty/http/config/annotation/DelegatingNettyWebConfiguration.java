@@ -8,7 +8,7 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.validation.Validator;
 
 import java.util.List;
-import java.util.concurrent.Executor;
+import java.util.Map;
 import java.util.concurrent.ExecutorService;
 
 /**
@@ -56,5 +56,8 @@ public class DelegatingNettyWebConfiguration extends NettyWebConfigurationSuppor
         return this.configurers.getValidator();
     }
 
-
+    @Override
+    protected Map<String, Object> getProperties() {
+        return this.configurers.getProperties();
+    }
 }

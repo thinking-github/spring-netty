@@ -56,4 +56,9 @@ public class NettyHttpConfig implements NettyWebConfigurer, ApplicationContextAw
     public Validator getValidator() {
         return null;
     }
+
+    @Override
+    public Map<String, Object> getProperties() {
+        return null;
+    }
 }
