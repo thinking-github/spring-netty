@@ -30,6 +30,8 @@ public interface NettyWebConfigurer {
     void configureMessageConverters(List<HttpMessageConverter<?>> converters);
 
 
+    void extendMessageConverters(List<HttpMessageConverter<?>> converters);
+
     /**
      * @param exceptionResolvers
      */

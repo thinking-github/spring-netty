@@ -20,7 +20,7 @@ public class GenericsUtils {
         if (indexInterface >= genericInterfaces.length || indexInterface < 0) {
             throw new IllegalArgumentException("index: " + index + ", size of " + clazz.getSimpleName() + "'s interfaces: " + genericInterfaces.length);
         }
-        Type genType = genericInterfaces[0];
+        Type genType = genericInterfaces[indexInterface];
         if (!(genType instanceof ParameterizedType)) {
             //log.warn(clazz.getSimpleName() + "'s interfaces not ParameterizedType");
             return Object.class;
@@ -31,10 +31,17 @@ public class GenericsUtils {
             throw new IllegalArgumentException("index: " + index + ", size of " + clazz.getSimpleName() + "'s Parameterized Type: " + params.length);
         }
 
-        if (!(params[index] instanceof Class)) {
-            log.warn(clazz.getSimpleName() + " not set the actual class on superclass generic parameter");
-            return Object.class;
+        Type type = params[index];
+        //public class ClickController implements HttpRequestHandler<Map<String,String>>
+        if ((type instanceof ParameterizedType)) {
+            Type rawType = ((ParameterizedType) type).getRawType();
+            return (Class<?>) rawType;
         }
-        return (Class<?>) params[index];
+
+        //public class ClickController implements HttpRequestHandler<ClickTracking>
+        if ((type instanceof Class)) {
+            return (Class<?>)type;
+        }
+        return Object.class;
     }
 }

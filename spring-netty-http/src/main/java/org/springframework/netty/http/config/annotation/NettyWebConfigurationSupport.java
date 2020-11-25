@@ -14,6 +14,7 @@ import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 import org.springframework.netty.http.DispatcherHandler;
 import org.springframework.netty.http.HandlerExceptionResolver;
 import org.springframework.netty.http.HttpServer;
+import org.springframework.netty.http.converter.FormHttpMessageConverter;
 import org.springframework.netty.http.converter.HttpMessageConverter;
 import org.springframework.netty.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.netty.http.handler.SimpleUrlHandlerMapping;
@@ -196,6 +197,9 @@ public class NettyWebConfigurationSupport implements ApplicationContextAware,Env
         } else if (gsonPresent) {
             //messageConverters.add(new GsonHttpMessageConverter());
         }
+
+        // support application/x-www-form-urlencoded
+        messageConverters.add(new FormHttpMessageConverter());
     }
 
 

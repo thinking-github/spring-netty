@@ -42,6 +42,12 @@ class NettyWebConfigurerComposite implements NettyWebConfigurer {
             delegate.configureMessageConverters(converters);
         }
     }
+    @Override
+    public void extendMessageConverters(List<HttpMessageConverter<?>> converters) {
+        for (NettyWebConfigurer delegate : this.delegates) {
+            delegate.extendMessageConverters(converters);
+        }
+    }
 
     @Override
     public void configureHandlerExceptionResolvers(List<HandlerExceptionResolver> exceptionResolvers) {

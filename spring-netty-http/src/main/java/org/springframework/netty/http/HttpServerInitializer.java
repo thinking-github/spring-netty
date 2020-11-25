@@ -15,7 +15,8 @@ import org.springframework.netty.http.demo.HttpRequestHandlerImpl;
  */
 public class HttpServerInitializer extends ChannelInitializer<SocketChannel> {
 
-    private static final int DEFAULT_MAX_CONTENT_LENGTH = 512 * 1024;
+    // DEFAULT MAX 1MB
+    private static final int DEFAULT_MAX_CONTENT_LENGTH = 1024 * 1024;
 
     private int maxContentLength = DEFAULT_MAX_CONTENT_LENGTH;
 
@@ -46,7 +47,7 @@ public class HttpServerInitializer extends ChannelInitializer<SocketChannel> {
 
         // http 编解码
         pipeline.addLast(new HttpServerCodec());
-        // http 消息聚合器  maxContentLength 512*1024
+        // http 消息聚合器  maxContentLength 1024 *1024
         pipeline.addLast("httpAggregator", new HttpObjectAggregator(maxContentLength));
         // 请求处理器
         if (dispatcherHandler != null) {

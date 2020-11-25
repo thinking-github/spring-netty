@@ -42,6 +42,11 @@ public class DelegatingNettyWebConfiguration extends NettyWebConfigurationSuppor
     }
 
     @Override
+    protected void extendMessageConverters(List<HttpMessageConverter<?>> converters) {
+        this.configurers.extendMessageConverters(converters);
+    }
+
+    @Override
     protected void configureHandlerExceptionResolvers(List<HandlerExceptionResolver> exceptionResolvers) {
         this.configurers.configureHandlerExceptionResolvers(exceptionResolvers);
     }

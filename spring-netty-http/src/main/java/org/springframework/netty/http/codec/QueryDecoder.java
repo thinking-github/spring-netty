@@ -16,6 +16,8 @@ public class QueryDecoder extends QueryStringDecoder {
 
     private Map<String, String> uriTemplateVariables;
 
+    private Map<String, String> bodyMap;
+
     public QueryDecoder(String uri) {
         super(uri);
     }
@@ -36,6 +38,14 @@ public class QueryDecoder extends QueryStringDecoder {
         super(uri, charset, hasPath, maxParams);
     }
 
+    public Map<String, String> getBodyMap() {
+        return bodyMap;
+    }
+
+    public void setBodyMap(Map<String, String> bodyMap) {
+        this.bodyMap = bodyMap;
+    }
+
 
     public void setUriTemplateVariables(Map<String, String> uriTemplateVariables) {
         this.uriTemplateVariables = uriTemplateVariables;
@@ -51,9 +61,11 @@ public class QueryDecoder extends QueryStringDecoder {
             }
             return values.get(0);
         } else {
+            if (bodyMap != null) {
+                return bodyMap.get(name);
+            }
             return null;
         }
-
     }
 
     // spring web RequestParamMapMethodArgumentResolver
@@ -65,6 +77,9 @@ public class QueryDecoder extends QueryStringDecoder {
             if (entry.getValue().size() > 0) {
                 result.put(entry.getKey(), entry.getValue().get(0));
             }
+        }
+        if (bodyMap != null) {
+            result.putAll(bodyMap);
         }
         return result;
     }
