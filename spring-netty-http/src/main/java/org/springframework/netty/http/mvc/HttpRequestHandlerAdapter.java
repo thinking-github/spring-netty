@@ -81,7 +81,7 @@ public class HttpRequestHandlerAdapter implements HandlerAdapter {
             if (logger.isDebugEnabled() && sampling) {
                 logger.debug("HttpRequest Body : {}", contentByte.toString(CharsetUtil.UTF_8));
             }
-            inputBody = messageConverterMethodProcessor.readWithMessageConverters(request, inputClass);
+            inputBody = messageConverterMethodProcessor.readWithMessageConverters(ctx,request, inputClass);
         }
 
 

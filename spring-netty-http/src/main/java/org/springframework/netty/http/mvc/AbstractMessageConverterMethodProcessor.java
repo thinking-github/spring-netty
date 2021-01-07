@@ -1,5 +1,6 @@
 package org.springframework.netty.http.mvc;
 
+import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.HttpMethod;
 import org.apache.commons.logging.Log;
@@ -68,7 +69,7 @@ public abstract class AbstractMessageConverterMethodProcessor {
     }
 
 
-    protected <T> Object readWithMessageConverters(FullHttpRequest inputMessage, Type targetType)
+    protected <T> Object readWithMessageConverters(ChannelHandlerContext ctx,FullHttpRequest inputMessage, Type targetType)
             throws IOException, HttpMediaTypeNotSupportedException {
         MediaType contentType = HttpUtils.getContentType(inputMessage);
         boolean noContentType = false;
@@ -106,7 +107,7 @@ public abstract class AbstractMessageConverterMethodProcessor {
                             logger.debug("Read [" + targetType + "] as \"" + contentType + "\" with [" + converter + "]");
                         }
                         if (inputMessage.content() != null) {
-                            body = ((HttpMessageConverter<T>) converter).read(targetClass, inputMessage);
+                            body = ((HttpMessageConverter<T>) converter).read(targetClass, ctx,inputMessage);
                         }
                         break;
                     }

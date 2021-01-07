@@ -51,13 +51,19 @@ public class HttpServer implements ApplicationListener<ContextRefreshedEvent> {
     @Autowired(required = false)
     private HttpServerConfigurer httpServerConfigurer;
 
-    public HttpServer(DispatcherHandler dispatcherHandler) {
+    @Autowired(required = false)
+    private NioEndpoint nioEndpoint;
+
+    public HttpServer(DispatcherHandler dispatcherHandler,NioEndpoint nioEndpoint) {
         this.dispatcherHandler = dispatcherHandler;
+        this.nioEndpoint = nioEndpoint;
     }
 
-    public HttpServer(DispatcherHandler dispatcherHandler, HttpServerConfigurer httpServerConfigurer) {
+    public HttpServer(DispatcherHandler dispatcherHandler, HttpServerConfigurer httpServerConfigurer
+            ,NioEndpoint nioEndpoint) {
         this.dispatcherHandler = dispatcherHandler;
         this.httpServerConfigurer = httpServerConfigurer;
+        this.nioEndpoint = nioEndpoint;
     }
 
     public HttpServer(int port) {
@@ -97,7 +103,7 @@ public class HttpServer implements ApplicationListener<ContextRefreshedEvent> {
 
 
         //.handler(new LoggingHandler(LogLevel.ERROR))
-        bootstrap.childHandler(new HttpServerInitializer(sslCtx, dispatcherHandler));
+        bootstrap.childHandler(new HttpServerInitializer(sslCtx, dispatcherHandler,nioEndpoint));
 
         ChannelFuture f = bootstrap.bind(new InetSocketAddress(port)).sync();
         Channel mainChannel = f.channel();

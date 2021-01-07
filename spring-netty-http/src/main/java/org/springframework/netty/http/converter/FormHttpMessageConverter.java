@@ -1,12 +1,15 @@
 package org.springframework.netty.http.converter;
 
+import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.http.FullHttpRequest;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.http.converter.HttpMessageNotWritableException;
+import org.springframework.netty.http.HandlerMapping;
 import org.springframework.netty.http.HttpOutputMessage;
 import org.springframework.netty.http.HttpUtils;
+import org.springframework.netty.http.codec.QueryDecoder;
 import org.springframework.util.*;
 
 import java.io.IOException;
@@ -137,7 +140,7 @@ public class FormHttpMessageConverter implements HttpMessageConverter<Map<String
     }
 
     @Override
-    public Map<String, ?> read(Class<? extends Map<String, ?>> clazz,
+    public Map<String, ?> read(Class<? extends Map<String, ?>> clazz, ChannelHandlerContext ctx,
                                FullHttpRequest request) throws IOException, HttpMessageNotReadableException {
 
         MediaType contentType = HttpUtils.getContentType(request);
@@ -174,6 +177,9 @@ public class FormHttpMessageConverter implements HttpMessageConverter<Map<String
             }
             stringMap = result;
         }
+        //post body set to request QueryDecoder
+        QueryDecoder queryDecoder = ctx.channel().attr(HandlerMapping.REQUEST_QUERY_URI).get();
+        queryDecoder.setBodyMap((Map<String, String>) stringMap);
 
         return stringMap;
     }

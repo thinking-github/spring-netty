@@ -1,12 +1,15 @@
 package org.springframework.netty.http.config.annotation;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.micrometer.core.instrument.binder.jvm.ExecutorServiceMetrics;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.FactoryBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.EnvironmentAware;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ConditionalOnClass;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.core.env.Environment;
 import org.springframework.http.MediaType;
@@ -14,6 +17,7 @@ import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 import org.springframework.netty.http.DispatcherHandler;
 import org.springframework.netty.http.HandlerExceptionResolver;
 import org.springframework.netty.http.HttpServer;
+import org.springframework.netty.http.NioEndpoint;
 import org.springframework.netty.http.converter.FormHttpMessageConverter;
 import org.springframework.netty.http.converter.HttpMessageConverter;
 import org.springframework.netty.http.converter.json.MappingJackson2HttpMessageConverter;
@@ -27,7 +31,6 @@ import org.springframework.util.ClassUtils;
 import org.springframework.validation.Validator;
 import org.springframework.web.HttpRequestHandler;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 
 import java.util.*;
 import java.util.concurrent.Executor;
@@ -62,6 +65,12 @@ public class NettyWebConfigurationSupport implements ApplicationContextAware,Env
             ClassUtils.isPresent("com.google.gson.Gson",
                     NettyWebConfigurationSupport.class.getClassLoader());
 
+    // meterRegistry  monitor
+    private static final boolean meterRegistryPresent =
+            ClassUtils.isPresent("io.micrometer.core.instrument.MeterRegistry",
+                    NettyWebConfigurationSupport.class.getClassLoader());
+
+    public final static String WORK_EXECUTOR_NAME = "nettyWorkExecutor";
     private Environment environment;
 
     private ApplicationContext applicationContext;
@@ -103,7 +112,6 @@ public class NettyWebConfigurationSupport implements ApplicationContextAware,Env
             handlerMapping.registerHandler(path, handler);
         }
     }
-
 
     /**
      * Return the associated Spring {@link ApplicationContext}.
@@ -314,7 +322,12 @@ public class NettyWebConfigurationSupport implements ApplicationContextAware,Env
 
     @Bean
     public HttpServer httpServer() {
-        HttpServer httpServer = new HttpServer(dispatcherHandler());
+        Boolean enabled = environment.getProperty("server.netty.endpoint.enabled", Boolean.class, true);
+        NioEndpoint nioEndpoint = null;
+        if (enabled) {
+            nioEndpoint = new NioEndpoint();
+        }
+        HttpServer httpServer = new HttpServer(dispatcherHandler(), nioEndpoint);
         this.httpServer = httpServer;
         return httpServer;
     }
@@ -323,7 +336,7 @@ public class NettyWebConfigurationSupport implements ApplicationContextAware,Env
         return httpServer;
     }
 
-    @Bean(destroyMethod = "shutdown")
+    @Bean(name = WORK_EXECUTOR_NAME,destroyMethod = "shutdown")
     public ExecutorService executorService() {
         ExecutorService executorService = getThreadPoolExecutor();
         if (executorService == null) {
@@ -342,16 +355,49 @@ public class NettyWebConfigurationSupport implements ApplicationContextAware,Env
         return executorService;
     }
 
+    //@Profile({"monitor","metrics"})
+    @ConditionalOnClass(name = "io.micrometer.core.instrument.MeterRegistry")
+    @Bean(name = WORK_EXECUTOR_NAME + "Metrics")
+    public FactoryBean<ExecutorServiceMetrics> executorServiceMetrics() {
+        ExecutorService executorService = executorService();
+        return new FactoryBean(){
+            @Override
+            public Object getObject() throws Exception {
+                return new ExecutorServiceMetrics(executorService, WORK_EXECUTOR_NAME, Collections.emptyList());
+            }
+
+            @Override
+            public Class<?> getObjectType() {
+                return ExecutorServiceMetrics.class;
+            }
+
+            @Override
+            public boolean isSingleton() {
+                return true;
+            }
+        };
+    }
+
     private void initExecutionProperties() {
-        Integer coreSize = environment.getProperty("server.netty.corePoolSize", Integer.class);
-        Integer maxSize = environment.getProperty("server.netty.max-threads", Integer.class);
-        Integer capacity = environment.getProperty("server.netty.queueCapacity", Integer.class);
+        Integer coreSize = environment.getProperty("server.netty.min-threads", Integer.class);
+        Integer maxSize =  environment.getProperty("server.netty.max-threads", Integer.class);
+        Integer capacity = environment.getProperty("server.netty.queue-capacity", Integer.class);
 
         if (coreSize == null) {
             coreSize = environment.getProperty("server.tomcat.min-spare-threads", Integer.class);
         }
         if (maxSize == null) {
             maxSize = environment.getProperty("server.tomcat.max-threads", Integer.class);
+        }
+
+        if(coreSize == null){
+            coreSize = environment.getProperty("server.jetty.threads.min", Integer.class);
+        }
+        if(maxSize == null){
+            maxSize = environment.getProperty("server.jetty.threads.max", Integer.class);
+        }
+        if(capacity ==null){
+            capacity = environment.getProperty("server.jetty.threads.max-queue-capacity", Integer.class);
         }
 
         if (coreSize == null) {
@@ -389,7 +435,4 @@ public class NettyWebConfigurationSupport implements ApplicationContextAware,Env
         }
         return map;
     }
-
-
-
 }

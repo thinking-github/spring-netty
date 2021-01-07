@@ -1,5 +1,6 @@
 package org.springframework.netty.http.converter;
 
+import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.FullHttpResponse;
 import io.netty.handler.codec.http.HttpHeaderNames;
@@ -166,7 +167,7 @@ public abstract class AbstractHttpMessageConverter <T> implements HttpMessageCon
      * Future implementations might add some default behavior, however.
      */
     @Override
-    public final T read(Class<? extends T> clazz, FullHttpRequest inputMessage)
+    public final T read(Class<? extends T> clazz, ChannelHandlerContext ctx, FullHttpRequest inputMessage)
             throws IOException, HttpMessageNotReadableException {
 
         return readInternal(clazz, inputMessage);

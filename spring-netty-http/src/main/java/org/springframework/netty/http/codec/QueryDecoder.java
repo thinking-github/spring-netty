@@ -6,6 +6,7 @@ import java.nio.charset.Charset;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 
 /**
  * @author thinking
@@ -82,6 +83,41 @@ public class QueryDecoder extends QueryStringDecoder {
             result.putAll(bodyMap);
         }
         return result;
+    }
+
+    /**
+     * Return a map containing all parameters with the given prefix.
+     * Maps single values to String and multiple values to String array.
+     * <p>For example, with a prefix of "spring_", "spring_param1" and
+     * "spring_param2" result in a Map with "param1" and "param2" as keys.
+     *
+     * @param prefix the beginning of parameter names
+     *               (if this is null or the empty string, all parameters will match)
+     * @return map containing request parameters <b>without the prefix</b>,
+     * containing either a String or a String array as values
+     */
+    public Map<String, Object> getParametersStartingWith(String prefix) {
+        Map<String, List<String>> parameterMap = this.parameters();
+        Map<String, Object> params = new TreeMap<String, Object>();
+        if (prefix == null) {
+            prefix = "";
+        }
+        for (Map.Entry<String, List<String>> entry : parameterMap.entrySet()) {
+            String paramName = entry.getKey();
+            if ("".equals(prefix) || paramName.startsWith(prefix)) {
+                String unprefixed = paramName.substring(prefix.length());
+                List<String> values = parameterMap.get(paramName);
+                if (values == null || values.size() == 0) {
+                    // Do nothing, no values found at all.
+                } else if (values.size() > 1) {
+                    params.put(unprefixed, values);
+                } else {
+                    params.put(unprefixed, values.get(0));
+                }
+            }
+
+        }
+        return params;
     }
 
 

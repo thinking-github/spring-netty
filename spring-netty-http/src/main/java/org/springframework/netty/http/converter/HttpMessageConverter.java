@@ -1,5 +1,6 @@
 package org.springframework.netty.http.converter;
 
+import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.FullHttpResponse;
 import org.springframework.http.MediaType;
@@ -48,7 +49,7 @@ public interface HttpMessageConverter<T> {
      * @return the converted object
      * @throws IOException in case of I/O errors
      */
-    T read(Class<? extends T> clazz, FullHttpRequest request) throws IOException;
+    T read(Class<? extends T> clazz, ChannelHandlerContext ctx, FullHttpRequest request) throws IOException;
 
     /**
      * Write an given object to the given output message.
