@@ -166,14 +166,15 @@
 
     <distributionManagement>
         <repository>
-            <id>apus</id>
-            <name>libs-releases</name>
-            <url>http://public-maven.apuscn.com/nexus/content/repositories/releases/</url>
+            <id>releases</id>
+            <name>Releases</name>
+            <url>${maven.releases.url}</url>
         </repository>
         <snapshotRepository>
-            <id>apus</id>
-            <name>libs-snapshots</name>
-            <url>http://public-maven.apuscn.com/nexus/content/repositories/snapshots/</url>
+            <id>snapshots</id>
+            <name>Snapshots</name>
+            <url>${maven.snapshots.url}</url>
+            <layout>default</layout>
         </snapshotRepository>
     </distributionManagement>
 
